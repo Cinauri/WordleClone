@@ -54,8 +54,8 @@ const row = document.querySelectorAll('.row');
 removekey.addEventListener('click', remove);
 
 for (let key of keyboardtext) {
-    const keyboardkey = document.createElement('span');
-    keyboardkey.classList.add('keyboardkey')
+    const keyboardkey = document.createElement('button');
+    keyboardkey.classList.add('keyboardkey');
     keyboardkey.innerText = key;
     keyboard.appendChild(keyboardkey);
 
@@ -72,30 +72,50 @@ for (let key of keyboardtext) {
 }
 
 //check the validity of word
+
+//thinking out loud: 
+// know if correctWord has duplicates 
+// if correctWord has duplicates && guess has duplicates of correct letter, turn green or yellow
+// if correctWord has no duplicates && guess has duplicate letters, turn grey once or green/yellow
 async function verify () {
     if (dataWords.indexOf(`${row[rowNo].innerText.toLowerCase()}`) < 0)  {
         alert('Please Choose a Valid Word');
         rowNo = rowNo;
     } 
     else {
+
         for (let i=0; i<difficulty; i++) {
             const newbox = row[rowNo].querySelectorAll('.newbox');
-            var findkey = document.evaluate(`//span[contains(., \'${row[rowNo].innerText[i]}\')]`, document, null, XPathResult.ANY_TYPE, null );
+            var findkey = document.evaluate(`/html/body/div/div/div/div//button[contains(., \'${row[rowNo].innerText[i]}\')]`, document, null, XPathResult.ANY_TYPE, null );
             var selectedkey = findkey.iterateNext();
+
             function verifyClass(newClass) {
                 setTimeout(()=>newbox[i].classList.add(newClass),400*i);
             }
+
+            function replaceKey(newClass) {
+                const newkey = document.createElement('button');
+                newkey.classList.add('keyboardkey');
+                newkey.innerText = selectedkey.innerText;
+                selectedkey.replaceWith(newkey);
+                if (Array.from(selectedkey.classList).includes('closekey') && newClass === 'wrongkey') {
+                    newkey.classList.add('closekey')
+                } else if (Array.from(selectedkey.classList).includes('correctkey') && (newClass === 'wrongkey' || 'closekey')) {
+                    newkey.classList.add('correctkey')
+                } else {newkey.classList.add(newClass)}
+            }
+            
             if (correctWord.indexOf(row[rowNo].innerText[i]) > -1) {
                 if(row[rowNo].innerText[i] === correctWord[i]) {
                     verifyClass('correct');
-                    selectedkey.classList.add('correctkey');
+                    replaceKey('correctkey');
                 } else {
                     verifyClass('close');
-                    selectedkey.classList.add('closekey');
+                    replaceKey('closekey');
                 }
             } else {
                 verifyClass('wrong');
-                selectedkey.classList.add('wrongkey');
+                replaceKey('wrongkey');
             } 
         }
         

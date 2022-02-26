@@ -78,16 +78,18 @@ for (let key of keyboardtext) {
 // if correctWord has duplicates && guess has duplicates of correct letter, turn green or yellow
 // if correctWord has no duplicates && guess has duplicate letters, turn grey once or green/yellow
 async function verify () {
+    
     if (dataWords.indexOf(`${row[rowNo].innerText.toLowerCase()}`) < 0)  {
         alert('Please Choose a Valid Word');
         rowNo = rowNo;
     } 
     else {
-
+        let correctWordRef = `${correctWord}`;
         for (let i=0; i<difficulty; i++) {
             const newbox = row[rowNo].querySelectorAll('.newbox');
             var findkey = document.evaluate(`/html/body/div/div/div/div//button[contains(., \'${row[rowNo].innerText[i]}\')]`, document, null, XPathResult.ANY_TYPE, null );
             var selectedkey = findkey.iterateNext();
+            
 
             function verifyClass(newClass) {
                 setTimeout(()=>newbox[i].classList.add(newClass),400*i);
@@ -105,13 +107,16 @@ async function verify () {
                 } else {newkey.classList.add(newClass)}
             }
             
-            if (correctWord.indexOf(row[rowNo].innerText[i]) > -1) {
-                if(row[rowNo].innerText[i] === correctWord[i]) {
+            if (correctWordRef.indexOf(row[rowNo].innerText[i]) > -1) {
+                if(row[rowNo].innerText[i] === correctWordRef[i]) {
                     verifyClass('correct');
                     replaceKey('correctkey');
+                    correctWordRef = correctWordRef.replace(correctWordRef[i], '0');
+
                 } else {
                     verifyClass('close');
                     replaceKey('closekey');
+                    correctWordRef = correctWordRef.replace(correctWordRef[i], '0');
                 }
             } else {
                 verifyClass('wrong');
@@ -153,7 +158,6 @@ window.addEventListener('keydown', e => {
         newbox.classList.add('newbox');
         newbox.innerText = e.key.toUpperCase();
         box.replaceWith(newbox);
-        console.log(e)
     } switch (e.key) {
         case 'Backspace': {
             remove();
